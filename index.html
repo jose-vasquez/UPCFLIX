@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>UPC Flix</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Chewy" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        *{
+            margin: 0;
+        }
+        body
+        {
+            font-family: 'Roboto', sans-serif;
+            background-color: #141414;
+            font-size: 16px;
+            color: #fff;
+        }
+        header
+        {
+            height: 64px;
+            line-height: 64px;
+            padding: 0 1em;
+        }
+        header .logo
+        {
+            font-family: 'Chewy', cursive;
+            color:#e40615;
+            display: inline-block;
+            font-size: 3em;
+        }
+        .navbar
+        {
+            display: inline-block;
+            float: right;
+        }
+        .navbar ul li
+        {
+            display: inline-block;
+            vertical-align: top;
+            margin: 0 0.5em;
+        }
+        .navbar ul li a
+        {
+            display: block;
+            padding: 0.5em;
+        }
+        .navbar ul li img
+        {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .resultado
+        {
+            margin-top: 1em;
+            height: 615px;
+            color: #fff;
+            position: relative;
+            display: none;
+        }
+        .resultado .fondo
+        {
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            height: 615px;
+            z-index: 1;
+        }
+        .resultado .datos
+        {
+            left: 0px;
+            top: 0px;
+            padding: 0 2em;
+            
+            font-size: 1.5em;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.5);
+            height: 615px;
+            z-index: 2;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .resultado .datos .extra
+        {
+            font-weight: bold;
+        }
+        .resultado .datos .otros
+        {
+            font-size: 0.7em;
+            color: #d8d8d8;
+        }
+        .resultado .datos .plot
+        {
+            width: 100%;
+            max-width: 600px;
+            padding: 1em 0;
+            font-weight: inherit;
+        }
+        .resultado .datos .titulo
+        {
+            font-size: 3em;
+            padding: 0.5em 0;
+        }
+        .resultado .rated
+        {
+            border: 1px #fff solid;
+            padding: 0.25em;
+        }
+        .search i,
+        .search input
+        {
+            vertical-align: middle;
+            display: inline-block;
+        }
+        .search input
+        {
+            background-color: transparent;
+            border: 1px #fff solid;
+            height: 3em;
+            width: 20em;
+            border-radius: 0.25em;
+            padding: 0 0.5em;
+            color: #fff;
+        }
+        .material-icons {
+            color: #fff;
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;  /* Preferred icon size */
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: 'liga';
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">UPCFLIX</div>
+        <div class="navbar">
+            <ul>
+                <li class="search">
+                    <i class="material-icons">search</i>
+                    <input id="buscador" type="text" placeholder="Títulos de peliculas">
+                </li>
+                <li class="usuario">
+                    <a href="">
+                        <img src="img/avatar.jpg" alt="">
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </header>
+    <section class="container">
+        <div id="error"></div>
+        <div class="resultado">
+            <div class="datos">
+                <div id="titulo" class="titulo"></div>
+                <div class="descripcion">
+                    <div class="extra">
+                        <span id="year"></span>
+                        <span id="rated" class="rated"></span>
+                        <span id="runtime"></span>
+                    </div>
+                    <div id="plot" class="plot"></div>
+                    <div class="otros">
+                        <div>Actores: <span id="actores"></span></div>
+                        <div>Género: <span id="genero"></span></div>
+                    </div>
+                </div>
+            </div>
+            <img id="fondo" class="fondo" src="" alt="" />                
+        </div>
+    </section>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script>
+        var url_base = "http://www.omdbapi.com/?", 
+            url_img = "http://img.omdbapi.com/?", 
+            apikey = "27cc8234",
+            titulo, url;
+
+        $(document).ready(function(){
+            $("#buscador").on('keyup', function (e) {
+                if (e.keyCode == 13) {
+                    titulo = $('#buscador').val();
+                    buscar(titulo);                    
+                }
+            }); 
+        });
+        function buscar()
+        {
+            url = url_base + "apikey=" + apikey + "&t=" + titulo;
+            console.log(url);
+            $.get(url, function( data ) {
+                url_image = url_img + "apikey=" + apikey + "&i=" + data.imdbID;
+                if(data.Response == "False")
+                {
+                    console.log( "Error." );
+                    console.log(data);
+                    $('#error').html(data.Error);
+                    $('.resultado').css({'display': 'none'});
+                }else{
+                    $('#error').html("");
+                    $('.resultado').css({'display': 'block'});
+                    $('#titulo').html(data.Title);
+                    $('#year').html(data.Year);
+                    $('#rated').html(data.Rated);
+                    $('#runtime').html(data.Runtime);
+                    $('#plot').html(data.Plot);
+                    $('#actores').html(data.Actors);
+                    $('#genero').html(data.Genre);
+
+                    $('#fondo').attr('src', url_image);
+                    console.log( url_img );
+                    console.log( "Load was performed." );
+                }
+            });
+        }
+    </script>
+</body>
+</html>
